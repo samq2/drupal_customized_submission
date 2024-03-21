@@ -5,16 +5,27 @@ Important!
 - Be sure to enable "Include files as attachment" in the Attachment section below
 - In "Included email values/markup section below, scroll towards the bottom and enable "Exclude element with file attachment"
 
-Documentation for elements_lists:
+Instructions for elements_lists:
 - Add the key in the order you want it to appear in the submission
 - Any hidden elements and optional fields will automatically not be included, continue to add them in the order you want it to appear in the form as if it is going to be visible
-- Add 'sbreak' to indicate a line break to give breathing room
-- Add the word 'section' before printing out just the section title. E.g. 'section submitter_information'
-- If you want to print a section the same format as it appears on the webform, use the above formatting while adding 'print' at the beginning. E.g. 'print section submitter_information'
+
+- Add 'break' to indicate 1 line break to give breathing room
+- Add 'break' followed by a number (e.g. 'break 4') to indicate number of line break
+
+- To use commands, type in the command followed by the element key. Available commands are:
+  - 'print_section' will print the section similar to the order of what's in the front-end form (e.g. 'print_section submitter_info') 
+  - 'print_section_title' will print only the section title appearing in the form with followed by some lines (----) (e.g. 'print_section_title get_started' will print Get Started)
+-- Commands can be expanded by putting the code inside the block {% elseif elementSplitLength == 2 %} below
 #} 
+
+
 Submitted on {{ webform_token('[webform_submission:created]', webform_submission, [], options) }}
 <br>
 Submitted by: {{ webform_token('[webform_submission:user]', webform_submission, [], options) }}
+<br>
+Submitted from: {{ webform_token('[webform_submission:user]', webform_submission, [], options) }}
+
+Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
 <br>
 {% set elements_list = 
   [
@@ -34,7 +45,7 @@ Submitted by: {{ webform_token('[webform_submission:user]', webform_submission, 
     {% set elementName = elementSplit[0] %}
 
     {% if (elementName != 'break') and (webform_token('[webform_submission:values:'~elementName~']', webform_submission) is not empty) %}
-      {{ webform_token('[webform:element:'~elementName~ ':title:html]', webform) }}:  {{ webform_token('[webform_submission:values:'~elementName~']', webform_submission) }}
+      {{ webform_token('[webform:element:'~elementName~ ':title:html]', webform)|render_html_specialchars }}:  {{ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars }}
       <br>
     {% elseif (elementName == 'break') %}
       <br>
@@ -63,28 +74,33 @@ Submitted by: {{ webform_token('[webform_submission:user]', webform_submission, 
         {% endfor %}
 
       {% elseif command = 'print_section' %}
-        {{ webform_token('[webform_submission:values:'~elementName~']', webform_submission) }}
+        {{ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars }}
 
       {% elseif command = 'print_section_title' %}
-        {{ webform_token('[webform:element:'~elementName~ ':title]', webform) }}
+        {{ webform_token('[webform:element:'~elementName~ ':title]', webform)|render_html_specialchars }}
         <br>
         ----------
         <br>
+
       {% else %}
-        {{ command }} is not a valid command. 
+        **      
+        **{{ command }} is not a valid command. 
+        **
       {% endif %}
 
     {% else %}
-      {{ element }} is not a valid key
+      **   
+      **{{ element }} is not a valid key
+      **
     {% endif %}
 
 
   {% else %}
 
+    **
+    ** {{ element }} is not a valid format. Use the pattern: 'element_key' or 'break' or '[command] element_key' or 'break [number]' 
+    **
 
-    {{ element }} is not a valid format. Use the pattern: 'element_key' or 'break' or '[command] element_key' or 'break [number]' 
-  
-  
   {% endif %}
 
 {% endfor %}
