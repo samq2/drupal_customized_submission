@@ -1,0 +1,90 @@
+{# 
+Copy and paste this code in the 
+Important! 
+- Be sure to enable "Send email as HTML" in the advanced tab to create the proper formatting in UW Connect
+- Be sure to enable "Include files as attachment" in the Attachment section below
+- In "Included email values/markup section below, scroll towards the bottom and enable "Exclude element with file attachment"
+
+Documentation for elements_lists:
+- Add the key in the order you want it to appear in the submission
+- Any hidden elements and optional fields will automatically not be included, continue to add them in the order you want it to appear in the form as if it is going to be visible
+- Add 'sbreak' to indicate a line break to give breathing room
+- Add the word 'section' before printing out just the section title. E.g. 'section submitter_information'
+- If you want to print a section the same format as it appears on the webform, use the above formatting while adding 'print' at the beginning. E.g. 'print section submitter_information'
+#} 
+Submitted on {{ webform_token('[webform_submission:created]', webform_submission, [], options) }}
+<br>
+Submitted by: {{ webform_token('[webform_submission:user]', webform_submission, [], options) }}
+<br>
+{% set elements_list = 
+  [
+  'section submitter_information',
+  'department'
+  ]
+%}
+
+{% for element in elements_list %}
+
+  {% set elementSplit = element|split(" ") %}
+  {% set elementSplitLength = elementSplit|length() %} 
+
+  {% if elementSplitLength == 1 %}
+
+
+    {% set elementName = elementSplit[0] %}
+
+    {% if (elementName != 'break') and (webform_token('[webform_submission:values:'~elementName~']', webform_submission) is not empty) %}
+      {{ webform_token('[webform:element:'~elementName~ ':title:html]', webform) }}:  {{ webform_token('[webform_submission:values:'~elementName~']', webform_submission) }}
+      <br>
+    {% elseif (elementName == 'break') %}
+      <br>
+      '
+      <br>
+    {% else %}
+      **
+      ** {{ element }} is not a valid key **
+      **
+    {% endif %}
+
+  
+  {% elseif elementSplitLength == 2 %}
+
+
+    {% set command = elementSplit[0] %}
+    {% set elementName = elementSplit[1] %}
+
+    {% if webform_token('[webform_submission:values:'~elementName~']', webform_submission) is not empty %}
+      
+      {% if command == 'break' %}
+        {% for 1..(elementSplit[1] * 1) %}
+          <br>
+          '
+          <br>
+        {% endfor %}
+
+      {% elseif command = 'print_section' %}
+        {{ webform_token('[webform_submission:values:'~elementName~']', webform_submission) }}
+
+      {% elseif command = 'print_section_title' %}
+        {{ webform_token('[webform:element:'~elementName~ ':title]', webform) }}
+        <br>
+        ----------
+        <br>
+      {% else %}
+        {{ command }} is not a valid command. 
+      {% endif %}
+
+    {% else %}
+      {{ element }} is not a valid key
+    {% endif %}
+
+
+  {% else %}
+
+
+    {{ element }} is not a valid format. Use the pattern: 'element_key' or 'break' or '[command] element_key' or 'break [number]' 
+  
+  
+  {% endif %}
+
+{% endfor %}
