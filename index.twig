@@ -64,9 +64,8 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
       {% for number in 1..(elementSplit[1] * 1) %}
         '
       {% endfor %}
-    {% endif %}
 
-    {% if (command != 'spacebreak') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
+    {% elseif (command != 'spacebreak') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
       
       {% if command == 'print_section' %}
         {{ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars }}

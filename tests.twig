@@ -32,7 +32,9 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
   'spacebreak 3',
   'department',
   'department_contact_name',
-  'department_contact_email'
+  'department_contact_email',
+  'spacebreak 2',
+  'submission_section'
   ]
 %}
 
@@ -68,9 +70,8 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
       {% for number in 1..(elementSplit[1] * 1) %}
         '
       {% endfor %}
-    {% endif %}
 
-    {% if (command != 'spacebreak') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
+    {% elseif (command != 'spacebreak') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
       
       {% if command == 'print_section' %}
         {{ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars }}
