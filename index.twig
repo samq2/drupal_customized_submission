@@ -21,6 +21,8 @@ Instructions for elements_lists:
 
 Submitted on {{ webform_token('[webform_submission:created]', webform_submission, [], options) }}
 Submitted by: {{ webform_token('[webform_submission:user]', webform_submission, [], options) }}
+Submitted from: {{ webform_token('[webform_submission:user]', webform_submission, [], options) }}
+
 Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
 '
 {% set elements_list = 
@@ -42,11 +44,9 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
 
     {% if (elementName != 'break') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
       {{ webform_token('[webform:element:'~elementName~ ':title:html]', webform)|render_html_specialchars }}:  {{ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars }}
-      <br>
+
     {% elseif (elementName == 'spacebreak') %}
-      <br>
       '
-      <br>
     {% else %}
       **
       ** {{ element }} is not a valid key **

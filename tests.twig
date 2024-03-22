@@ -18,9 +18,10 @@ Instructions for elements_lists:
 -- Commands can be expanded by putting the code inside the block {% elseif elementSplitLength == 2 %} below
 #} 
 
-
 Submitted on {{ webform_token('[webform_submission:created]', webform_submission, [], options) }}
 Submitted by: {{ webform_token('[webform_submission:user]', webform_submission, [], options) }}
+Submitted from: {{ webform_token('[webform_submission:user]', webform_submission, [], options) }}
+
 Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
 '
 {% set elements_list = 
@@ -34,6 +35,7 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
   'department_contact_email'
   ]
 %}
+
 {% for element in elements_list %}
 
   {% set elementSplit = element|split(" ") %}
@@ -46,11 +48,9 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
 
     {% if (elementName != 'break') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
       {{ webform_token('[webform:element:'~elementName~ ':title:html]', webform)|render_html_specialchars }}:  {{ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars }}
-      <br>
+
     {% elseif (elementName == 'spacebreak') %}
-      <br>
       '
-      <br>
     {% else %}
       **
       ** {{ element }} is not a valid key **
@@ -102,3 +102,5 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
   {% endif %}
 
 {% endfor %}
+
+
