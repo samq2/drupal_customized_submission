@@ -20,13 +20,9 @@ Instructions for elements_lists:
 
 
 Submitted on {{ webform_token('[webform_submission:created]', webform_submission, [], options) }}
-<br>
 Submitted by: {{ webform_token('[webform_submission:user]', webform_submission, [], options) }}
-<br>
-Submitted from: {{ webform_token('[webform_submission:user]', webform_submission, [], options) }}
-
 Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
-<br>
+'
 {% set elements_list = 
   [
   'section submitter_information',
@@ -66,9 +62,7 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
 
     {% if command == 'spacebreak' %}
       {% for number in 1..(elementSplit[1] * 1) %}
-        <br>
         '
-        <br>
       {% endfor %}
     {% endif %}
 
@@ -79,9 +73,8 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
 
       {% elseif command == 'print_section_title' %}
         {{ webform_token('[webform:element:'~elementName~ ':title]', webform)|render_html_specialchars }}
-        <br>
         ----------
-        <br>
+        '
 
       {% else %}
         **      
@@ -105,5 +98,3 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
   {% endif %}
 
 {% endfor %}
-
-This is the no break branch.
