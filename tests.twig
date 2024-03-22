@@ -34,7 +34,7 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
   'department_contact_name',
   'department_contact_email',
   'spacebreak 2',
-  'submission_section'
+  'print_section submission_section'
   ]
 %}
 
@@ -78,9 +78,7 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
 
       {% elseif command == 'print_section_title' %}
         {{ webform_token('[webform:element:'~elementName~ ':title]', webform)|render_html_specialchars }}
-        ----------
-        '
-
+        ----
       {% else %}
         **      
         **{{ command }} is not a valid command. 
