@@ -20,13 +20,9 @@ Instructions for elements_lists:
 
 
 Submitted on {{ webform_token('[webform_submission:created]', webform_submission, [], options) }}
-<br>
 Submitted by: {{ webform_token('[webform_submission:user]', webform_submission, [], options) }}
-<br>
-Submitted from: {{ webform_token('[webform_submission:user]', webform_submission, [], options) }}
-
 Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
-<br>
+'
 {% set elements_list = 
   [
   'print_section submitter_information',
@@ -38,7 +34,6 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
   'department_contact_email'
   ]
 %}
-
 {% for element in elements_list %}
 
   {% set elementSplit = element|split(" ") %}
@@ -69,24 +64,21 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
     {% set command = elementSplit[0] %}
     {% set elementName = elementSplit[1] %}
 
-    {% if 'webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)%}
-      
-      {% if command == 'spacebreak' %}
-        {% set convertedNumber = elementSplit[1] * 1 %}
-        {% for 1..convertedNumber %}
-          <br>
-          '
-          <br>
-        {% endfor %}
+    {% if command == 'spacebreak' %}
+      {% for number in 1..(elementSplit[1] * 1) %}
+        '
+      {% endfor %}
+    {% endif %}
 
-      {% elseif command = 'print_section' %}
+    {% if (command != 'spacebreak') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
+      
+      {% if command == 'print_section' %}
         {{ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars }}
 
-      {% elseif command = 'print_section_title' %}
+      {% elseif command == 'print_section_title' %}
         {{ webform_token('[webform:element:'~elementName~ ':title]', webform)|render_html_specialchars }}
-        <br>
         ----------
-        <br>
+        '
 
       {% else %}
         **      
