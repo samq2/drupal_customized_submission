@@ -68,6 +68,7 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
     {% elseif (command != 'spacebreak') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
       
       {% if command == 'print_section' %}
+        {% if (webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars) is not empty }
         {{ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars }}
 
       {% elseif command == 'print_section_title' %}
