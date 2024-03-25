@@ -17,18 +17,18 @@ Instructions for elements_lists:
   - 'print_section_title' will print only the section title appearing in the form with followed by some lines (----) (e.g. 'print_section_title get_started' will print Get Started)
 -- Commands can be expanded by putting the code inside the block {% elseif elementSplitLength == 2 %} below
 #} 
+{% set submissionString = '' %}
+{% set whitespaceCounter = 8 %}
 
+{% set submissionString = submissionString ~ 'Submitted on: ' ~ webform_token('[webform_submission:created]', webform_submission, [], options) ~ '\n' %}
+{% set submissionString = submissionString ~ 'Submitted by: ' ~ webform_token('[webform_submission:user]', webform_submission, [], options) ~ '\n' %}
+{% set submissionString = submissionString ~ 'Submitted from: ' ~ webform_token('[webform:title]', webform, [], options) ~ '\n \n' %}
 
-Submitted on {{ webform_token('[webform_submission:created]', webform_submission, [], options) }}
-Submitted by: {{ webform_token('[webform_submission:user]', webform_submission, [], options) }}
-Submitted from: {{ webform_token('[webform_submission:user]', webform_submission, [], options) }}
-
-Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
-'
 {% set elements_list = 
   [
-  'section submitter_information',
-  'department'
+  'department',
+  'department_contact_name',
+  'department_contact_email'
   ]
 %}
 
@@ -43,14 +43,17 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
     {% set elementName = elementSplit[0] %}
 
     {% if (elementName != 'break') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
-      {{ webform_token('[webform:element:'~elementName~ ':title:html]', webform)|render_html_specialchars }}:  {{ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars }}
+      {% set submissionString = submissionString ~ webform_token('[webform:element:'~elementName~ ':title:html]', webform)|render_html_specialchars ~': ' ~  webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars ~ '\n' %}
+      {% set whitespaceCounter = whitespaceCounter + 1 %}
 
     {% elseif (elementName == 'spacebreak') %}
-      '
+      {% set submissionString = submissionString ~ '\n' %}
+      {% set whitespaceCounter = whitespaceCounter + 1 %}
     {% else %}
-      **
-      ** {{ element }} is not a valid key **
-      **
+      {% set submissionString = submissionString ~ '\n' 
+      ~ element ~ 'is not a valid key \n' 
+      ~ '\n' %}
+
     {% endif %}
 
   
@@ -62,36 +65,36 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
 
     {% if command == 'spacebreak' %}
       {% for number in 1..(elementSplit[1] * 1) %}
-        '
+        {% set submissionString = submissionString ~ '\n'}
       {% endfor %}
 
     {% elseif (command != 'spacebreak') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
       
       {% if command == 'print_section' %}
         {% if (webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars) is not empty }
-        {{ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars }}
+        {% set submissionString = submissionString ~ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars ~ '\n' %}
 
       {% elseif command == 'print_section_title' %}
-        {{ webform_token('[webform:element:'~elementName~ ':title]', webform)|render_html_specialchars }}
-        ----
+        {% set submissionString = submissionString ~ webform_token('[webform:element:'~elementName~ ':title]', webform)|render_html_specialchars ~ '\n' 
+        ~ '----' ~ '\n' %}
+        
       {% else %}
-        **      
-        **{{ command }} is not a valid command. 
-        **
+        {% set submissionString = submissionString ~ '\n' 
+        command ~ 'is not a valid command \n'
+        ~ '\n' %}
       {% endif %}
 
     {% else %}
-      **   
-      **{{ element }} is not a valid key
-      **
+      {% set submissionString = submissionString ~ '\n' 
+      element ~ 'is not a valid key \n'
+      ~ '\n' %}
     {% endif %}
 
 
   {% else %}
-
-    **
-    ** {{ element }} is not a valid format. Use the pattern: 'element_key' or 'break' or '[command] element_key' or 'break [number]' 
-    **
+    {% set submissionString = submissionString ~ '\n' 
+    element ~ 'is not a valid format. Use the pattern: "element_key" or "break" or "[command] element_key" or "break [number]" \n'
+    ~ '\n' %}
 
   {% endif %}
 
