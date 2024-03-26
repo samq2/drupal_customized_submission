@@ -1,34 +1,15 @@
-{# 
-Copy and paste this code in the 
-Important! 
-- Be sure to enable "Send email as HTML" in the advanced tab to create the proper formatting in UW Connect
-- Be sure to enable "Include files as attachment" in the Attachment section below
-- In "Included email values/markup section below, scroll towards the bottom and enable "Exclude element with file attachment"
-
-Instructions for elements_lists:
-- Add the key in the order you want it to appear in the submission
-- Any hidden elements and optional fields will automatically not be included, continue to add them in the order you want it to appear in the form as if it is going to be visible
-
-- Add 'spacebreak' to indicate 1 line break to give breathing room
-- Add 'spacebreak' followed by a number (e.g. 'break 4') to indicate number of line break
-
-- To use commands, type in the command followed by the element key. Available commands are:
-  - 'print_section' will print the section similar to the order of what's in the front-end form (e.g. 'print_section submitter_info') 
-  - 'print_section_title' will print only the section title appearing in the form with followed by some lines (----) (e.g. 'print_section_title get_started' will print Get Started)
--- Commands can be expanded by putting the code inside the block {% elseif elementSplitLength == 2 %} below
-#} 
 {% set submissionString = '' %}
-{% set whitespaceCounter = 8 %}
+{% set whitespaceCounter = 4 %}
 
 {% set submissionString = submissionString ~ 'Submitted on: ' ~ webform_token('[webform_submission:created]', webform_submission, [], options) ~ '\n' %}
 {% set submissionString = submissionString ~ 'Submitted by: ' ~ webform_token('[webform_submission:user]', webform_submission, [], options) ~ '\n' %}
-{% set submissionString = submissionString ~ 'Submitted from: ' ~ webform_token('[webform:title]', webform, [], options) ~ '\n \n' %}
+{% set submissionString = submissionString ~ 'Submitted from: ' ~ webform_token('[webform:title]', webform, [], options) ~ '\n\n' %}
 
 {% set elements_list = 
   [
-  'department',
-  'department_contact_name',
-  'department_contact_email'
+  'text_area_1',
+  'spacebreak',
+  'text_area_2'
   ]
 %}
 
@@ -42,18 +23,18 @@ Instructions for elements_lists:
 
     {% set elementName = elementSplit[0] %}
 
-    {% if (elementName != 'break') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
+    {% if (elementName != 'spacebreak') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
       {% set submissionString = submissionString ~ webform_token('[webform:element:'~elementName~ ':title:html]', webform)|render_html_specialchars ~': ' ~  webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars ~ '\n' %}
       {% set whitespaceCounter = whitespaceCounter + 2 %}
 
     {% elseif (elementName == 'spacebreak') %}
       {% set submissionString = submissionString ~ '\n' %}
-      {% set whitespaceCounter = whitespaceCounter + 2 %}
+      {% set whitespaceCounter = whitespaceCounter + 1 %}
     {% else %}
       {% set submissionString = submissionString ~ '\n' 
-      ~ element ~ 'is not a valid key \n' 
+      ~ element ~ ' is not a valid key\n' 
       ~ '\n' %}
-      {% set whitespaceCounter = whitespaceCounter + 6 %}
+      {% set whitespaceCounter = whitespaceCounter + 3 %}
     {% endif %}
 
   
@@ -66,40 +47,41 @@ Instructions for elements_lists:
     {% if command == 'spacebreak' %}
       {% for number in 1..(elementSplit[1] * 1) %}
         {% set submissionString = submissionString ~ '\n' %}
-        {% set whitespaceCounter = whitespaceCounter + 2 %}
+        {% set whitespaceCounter = whitespaceCounter + 1 %}
       {% endfor %}
 
     {% elseif (command != 'spacebreak') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
       
       {% if command == 'print_section' %}
-        {% if (webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars) is not empty }
+        {% if (webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars) is not empty %}
         {% set submissionString = submissionString ~ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars ~ '\n' %}
-        {% set whitespaceCounter = whitespaceCounter + 2 %}
+        {% set whitespaceCounter = whitespaceCounter + 1 %}
+        {% endif %}
 
       {% elseif command == 'print_section_title' %}
         {% set submissionString = submissionString ~ webform_token('[webform:element:'~elementName~ ':title]', webform)|render_html_specialchars ~ '\n----\n'  %}
-      {% set whitespaceCounter = whitespaceCounter + 4 %}
+        {% set whitespaceCounter = whitespaceCounter + 2 %}
         
       {% else %}
         {% set submissionString = submissionString ~ '\n' 
-        command ~ 'is not a valid command \n'
+        ~ command ~ ' is not a valid command\n'
         ~ '\n' %}
-        {% set whitespaceCounter = whitespaceCounter + 6 %}
+        {% set whitespaceCounter = whitespaceCounter + 3 %}
       {% endif %}
 
     {% else %}
-      {% set submissionString = submissionString ~ '\n' 
-      element ~ 'is not a valid key \n'
+      {% set submissionString = submissionString ~ '\n'
+      ~ element ~ ' is not a valid key \n'
       ~ '\n' %}
-      {% set whitespaceCounter = whitespaceCounter + 6 %}
+      {% set whitespaceCounter = whitespaceCounter + 3 %}
     {% endif %}
 
 
   {% else %}
     {% set submissionString = submissionString ~ '\n' 
-    element ~ 'is not a valid format. Use the pattern: "element_key" or "break" or "[command] element_key" or "break [number]" \n'
+    ~ element ~ 'is not a valid format. Use the pattern: "element_key" or "break" or "[command] element_key" or "break [number]"\n'
     ~ '\n' %}
-    {% set whitespaceCounter = whitespaceCounter + 6 %}
+    {% set whitespaceCounter = whitespaceCounter + 2 %}
 
   {% endif %}
 
@@ -107,3 +89,11 @@ Instructions for elements_lists:
 
 
 
+{% if submissionString|length > 4000 %}
+  Note for AST: This submission surpasses the 4,000 character limit. Please see the "Additional Comments" at the bottom to see the whole submission.
+{% endif %}
+The submission has {{ submissionString|length }} characters.
+White space counter: {{ whitespaceCounter }}
+
+Here's the submission:
+{{ submissionString }}
