@@ -80,10 +80,8 @@
 
 
 {% if submissionString|length > 4000 %}
-  Note for AST: This submission surpasses the 4,000 character limit. Please see the "Additional Comments" at the bottom to see the whole submission.
+  Note for AST: This submission surpasses the 4,000 character limit. Please see the "Additional Comments" at the bottom of the ticket to see the whole submission.
 {% endif %}
 The submission has {{ submissionString|length }} characters.
-White space counter: {{ whitespaceCounter }}
 
-Here's the submission:
 {{ submissionString }}
