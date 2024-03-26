@@ -8,13 +8,15 @@
   [
   'text_area_1',
   'spacebreak',
-  'text_area_2'
+  'text_area_2',
+  'print_text | This should be printed',
+  'print_line | bolded'
   ]
 %}
 
 {% for element in elements_list %}
 
-  {% set elementSplit = element|split(" ") %}
+  {% set elementSplit = element|split(" | ") %}
   {% set elementSplitLength = elementSplit|length() %} 
 
   {% if elementSplitLength == 1 %}
@@ -45,6 +47,14 @@
         {% set submissionString = submissionString ~ '\n' %}
       {% endfor %}
 
+    {% elseif command == 'print_text' %}
+      {% set submissionString = submissionString ~ elementName ~ '\n' %}
+  
+    {% elseif command == 'print_line' %}
+      {% if elementName == 'bolded' %}
+        {% set submissionString = submissionString ~ '*****\n' %}
+      {% endif %}
+     
     {% elseif (command != 'spacebreak') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
       
       {% if command == 'print_section' %}
@@ -54,7 +64,7 @@
 
       {% elseif command == 'print_section_title' %}
         {% set submissionString = submissionString ~ webform_token('[webform:element:'~elementName~ ':title]', webform)|render_html_specialchars ~ '\n----\n'  %}
-        
+
       {% else %}
         {% set submissionString = submissionString ~ '\n' 
         ~ command ~ ' is not a valid command\n'
@@ -76,8 +86,6 @@
   {% endif %}
 
 {% endfor %}
-
-
 
 {% if submissionString|length > 4000 %}
   Note for AST: This submission surpasses the 4,000 character limit. Please see the "Additional Comments" at the bottom of the ticket to see the whole submission.
