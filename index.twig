@@ -1,5 +1,4 @@
 {% set submissionString = '' %}
-{% set whitespaceCounter = 4 %}
 
 {% set submissionString = submissionString ~ 'Submitted on: ' ~ webform_token('[webform_submission:created]', webform_submission, [], options) ~ '\n' %}
 {% set submissionString = submissionString ~ 'Submitted by: ' ~ webform_token('[webform_submission:user]', webform_submission, [], options) ~ '\n' %}
@@ -25,16 +24,13 @@
 
     {% if (elementName != 'spacebreak') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
       {% set submissionString = submissionString ~ webform_token('[webform:element:'~elementName~ ':title:html]', webform)|render_html_specialchars ~': ' ~  webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars ~ '\n' %}
-      {% set whitespaceCounter = whitespaceCounter + 2 %}
 
     {% elseif (elementName == 'spacebreak') %}
       {% set submissionString = submissionString ~ '\n' %}
-      {% set whitespaceCounter = whitespaceCounter + 1 %}
     {% else %}
       {% set submissionString = submissionString ~ '\n' 
       ~ element ~ ' is not a valid key\n' 
       ~ '\n' %}
-      {% set whitespaceCounter = whitespaceCounter + 3 %}
     {% endif %}
 
   
@@ -47,7 +43,6 @@
     {% if command == 'spacebreak' %}
       {% for number in 1..(elementSplit[1] * 1) %}
         {% set submissionString = submissionString ~ '\n' %}
-        {% set whitespaceCounter = whitespaceCounter + 1 %}
       {% endfor %}
 
     {% elseif (command != 'spacebreak') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
@@ -55,25 +50,21 @@
       {% if command == 'print_section' %}
         {% if (webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars) is not empty %}
         {% set submissionString = submissionString ~ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars ~ '\n' %}
-        {% set whitespaceCounter = whitespaceCounter + 1 %}
         {% endif %}
 
       {% elseif command == 'print_section_title' %}
         {% set submissionString = submissionString ~ webform_token('[webform:element:'~elementName~ ':title]', webform)|render_html_specialchars ~ '\n----\n'  %}
-        {% set whitespaceCounter = whitespaceCounter + 2 %}
         
       {% else %}
         {% set submissionString = submissionString ~ '\n' 
         ~ command ~ ' is not a valid command\n'
         ~ '\n' %}
-        {% set whitespaceCounter = whitespaceCounter + 3 %}
       {% endif %}
 
     {% else %}
       {% set submissionString = submissionString ~ '\n'
       ~ element ~ ' is not a valid key \n'
       ~ '\n' %}
-      {% set whitespaceCounter = whitespaceCounter + 3 %}
     {% endif %}
 
 
@@ -81,7 +72,6 @@
     {% set submissionString = submissionString ~ '\n' 
     ~ element ~ 'is not a valid format. Use the pattern: "element_key" or "break" or "[command] element_key" or "break [number]"\n'
     ~ '\n' %}
-    {% set whitespaceCounter = whitespaceCounter + 2 %}
 
   {% endif %}
 
