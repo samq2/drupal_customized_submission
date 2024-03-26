@@ -31,7 +31,9 @@
       {% set submissionString = submissionString ~ '-----\n' %}
 
     {% elseif 'webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission) %}
-      {% set submissionString = submissionString ~ webform_token('[webform:element:'~elementName~ ':title:html]', webform)|render_html_specialchars ~': ' ~  webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars ~ '\n' %}
+      {% if webform_token('[webform_submission:values:'~elementName~']', webform_submission) is not empty %}
+        {% set submissionString = submissionString ~ webform_token('[webform:element:'~elementName~ ':title:html]', webform)|render_html_specialchars ~': ' ~  webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars ~ '\n' %}
+      {% endif %}
 
     {% elseif (elementName == 'spacebreak') %}
       {% set submissionString = submissionString ~ '\n' %}
