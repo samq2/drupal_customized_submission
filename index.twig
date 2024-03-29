@@ -18,28 +18,30 @@
 
   {% set elementSplit = element|split(" | ") %}
   {% set elementSplitLength = elementSplit|length() %} 
+  {% set listOfCommands = 'Please put an element_key or use any of the following commands:\n- spacebreak\n"spacebreak | [number]"\n- print_line\n- print_line | bolded\n- print_section | [element_key]\n- print_section_title | [element_key]\n- print_text | [insert text ]' %}
 
   {% if elementSplitLength == 1 %}
 
 
     {% set elementName = elementSplit[0] %}
-
+    
+    {# spacebreak command #}
     {% if elementName == 'spacebreak' %}
       {% set submissionString = submissionString ~ '\n' %}
     
+    {# print_line command (-----) #}
     {% elseif (elementName == 'print_line') %}
       {% set submissionString = submissionString ~ '-----\n' %}
 
+    {# prints element that has the correct key, and if the value is not empty #}
     {% elseif 'webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission) %}
       {% if webform_token('[webform_submission:values:'~elementName~']', webform_submission) is not empty %}
         {% set submissionString = submissionString ~ webform_token('[webform:element:'~elementName~ ':title:html]', webform)|render_html_specialchars ~': ' ~  webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars ~ '\n' %}
       {% endif %}
 
-    {% elseif (elementName == 'spacebreak') %}
-      {% set submissionString = submissionString ~ '\n' %}
     {% else %}
       {% set submissionString = submissionString ~ '\n' 
-      ~ element ~ ' is not a valid key\n' 
+      ~ element ~ ' is not a valid key or command is not spacebreak or print_line\n' 
       ~ '\n' %}
     {% endif %}
 
@@ -49,46 +51,59 @@
 
     {% set command = elementSplit[0] %}
     {% set elementName = elementSplit[1] %}
+    {% set elementKeyInvalid = 'webform_submission' in webform_token('[webform_submission:values:'~elementName~']', webform_submission) %}
 
+    {# multiple spacebreak command #}
     {% if command == 'spacebreak' %}
       {% for number in 1..(elementSplit[1] * 1) %}
         {% set submissionString = submissionString ~ '\n' %}
       {% endfor %}
 
+    {# print customized text command #}
     {% elseif command == 'print_text' %}
       {% set submissionString = submissionString ~ elementName ~ '\n' %}
   
+    {# print bolded line command (*****) #}
     {% elseif command == 'print_line' %}
       {% if elementName == 'bolded' %}
         {% set submissionString = submissionString ~ '*****\n' %}
       {% endif %}
      
-    {% elseif (command != 'spacebreak') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
-      
-      {% if command == 'print_section' %}
+    {% elseif command == 'print_section' or command != 'print_section_title' %}
+
+      {# Checks if key is valid #}
+      {% if elementKeyInvalid == 1 %}
+        {% set submissionString = submissionString ~ '\n' 
+        ~ elementName ~ ' is not a valid key\n'
+        ~ '\n' %}
+
+      {# print a particular section as it is command #}
+      {% elseif command == 'print_section' %}
         {% if (webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars) is not empty %}
         {% set submissionString = submissionString ~ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars ~ '\n' %}
         {% endif %}
 
+      {# print only the section's title followed by lines (-----) #}
       {% elseif command == 'print_section_title' %}
-        {% set submissionString = submissionString ~ webform_token('[webform:element:'~elementName~ ':title]', webform)|render_html_specialchars ~ '\n----\n'  %}
+        {% set submissionString = submissionString ~ webform_token('[webform:element:'~elementName~ ':title]', webform)|render_html_specialchars ~ '\n-----\n'  %}
 
+      {# Notifies if a command is not valid #}
       {% else %}
         {% set submissionString = submissionString ~ '\n' 
-        ~ command ~ ' is not a valid command\n'
+        ~ command ~ ' is not a valid command for the provided key\n'
         ~ '\n' %}
       {% endif %}
 
     {% else %}
       {% set submissionString = submissionString ~ '\n'
-      ~ element ~ ' is not a valid key \n'
+      ~ command ~ ' is not a valid command (e.g. print_line | bolded, print_text "Insert text here", space_break | 2) \n'
       ~ '\n' %}
     {% endif %}
 
 
   {% else %}
     {% set submissionString = submissionString ~ '\n' 
-    ~ element ~ 'is not a valid format. Use the pattern: "element_key" or "break" or "[command] element_key" or "break [number]"\n'
+    ~ element ~ 'is not a valid format. '~ listOfCommands ~ '\n'
     ~ '\n' %}
 
   {% endif %}
