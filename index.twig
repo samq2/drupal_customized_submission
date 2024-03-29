@@ -103,7 +103,7 @@
 
   {% else %}
     {% set submissionString = submissionString ~ '\n' 
-    ~ element ~ 'is not a valid format. \n'
+    ~ element ~ 'is not a valid format. '~ listOfCommands ~ '\n'
     ~ '\n' %}
 
   {% endif %}
