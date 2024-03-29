@@ -24,6 +24,9 @@
 
 
     {% set elementName = elementSplit[0] %}
+    {% set title = webform_token('[webform:element:'~ elementName ~':title:html]', webform)|render_html_specialchars %}
+    {% set value = webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars %}
+    {% set titleValue = [title, value]|join(': ') %}
     
     {# spacebreak command #}
     {% if elementName == 'spacebreak' %}
@@ -36,7 +39,7 @@
     {# prints element that has the correct key, and if the value is not empty #}
     {% elseif 'webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission) %}
       {% if webform_token('[webform_submission:values:'~elementName~']', webform_submission) is not empty %}
-        {% set submissionString = submissionString ~ webform_token('[webform:element:'~elementName~ ':title:html]', webform)|render_html_specialchars ~': ' ~  webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars ~ '\n' %}
+        {% set submissionString = submissionString ~ titleValue ~ '\n' %}
       {% endif %}
 
     {% else %}
