@@ -1,51 +1,49 @@
-{% set submissionString = '' %}
-
-{% set submissionString = submissionString ~ 'Submitted on: ' ~ webform_token('[webform_submission:created]', webform_submission, [], options) ~ '\n' %}
-{% set submissionString = submissionString ~ 'Submitted by: ' ~ webform_token('[webform_submission:user]', webform_submission, [], options) ~ '\n' %}
-{% set submissionString = submissionString ~ 'Submitted from: ' ~ webform_token('[webform:title]', webform, [], options) ~ '\n\n' %}
-
 {% set elements_list = 
   [
-  'text_area_1',
-  'spacebreak',
-  'text_area_2',
-  'print_text | This should be printed',
-  'print_line | bolded'
+  "text_area_1",
+  "spacebreak",
+  "text_area_2",
+  "print_text | This should be printed",
+  "print_line | bolded"
   ]
 %}
+{% set characterCounter = 0 %}
 
 {% for element in elements_list %}
 
   {% set elementSplit = element|split(" | ") %}
   {% set elementSplitLength = elementSplit|length() %} 
-  {% set listOfCommands = 'Please put an element_key or use any of the following commands:\n- spacebreak\n"spacebreak | [number]"\n- print_line\n- print_line | bolded\n- print_section | [element_key]\n- print_section_title | [element_key]\n- print_text | [insert text ]' %}
-
+{#  {% set listOfCommands = "Please put an element_key or use any of the following commands:\n- spacebreak\n"spacebreak | [number]"\n- print_line\n- print_line | bolded\n- print_section | [element_key]\n- print_section_title | [element_key]\n- print_text | [insert text ]" %}
+#}
   {% if elementSplitLength == 1 %}
 
 
     {% set elementName = elementSplit[0] %}
-    {% set title = webform_token('[webform:element:'~ elementName ~':title:html]', webform)|render_html_specialchars %}
-    {% set value = webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars %}
-    {% set titleValue = [title, value]|join(': ') %}
+    {% set title = webform_token("[webform:element:"~ elementName ~":title:html]", webform)|render_html_specialchars %}
+    {% set value = webform_token("[webform_submission:values:"~elementName~"]", webform_submission)|render_html_specialchars %}
     
     {# spacebreak command #}
-    {% if elementName == 'spacebreak' %}
-      {% set submissionString = submissionString ~ '\n' %}
+    {% if elementName == "spacebreak" %}
+      '
+      {% set characterCounter = characterCounter + 1 %} 
     
     {# print_line command (-----) #}
-    {% elseif (elementName == 'print_line') %}
-      {% set submissionString = submissionString ~ '-----\n' %}
+    {% elseif (elementName == "print_line") %}
+      -----
+      <br>
+      {% set characterCounter = characterCounter + 5 %} 
 
     {# prints element that has the correct key, and if the value is not empty #}
-    {% elseif 'webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission) %}
-      {% if webform_token('[webform_submission:values:'~elementName~']', webform_submission) is not empty %}
-        {% set submissionString = submissionString ~ titleValue ~ '\n' %}
+    {% elseif "webform_submission" not in webform_token("[webform_submission:values:"~elementName~"]", webform_submission) %}
+      {% if webform_token("[webform_submission:values:"~elementName~"]", webform_submission) is not empty %}
+        {{ webform_token("[webform:element:"~ elementName ~":title:html]", webform)|render_html_specialchars }}: {{ webform_token("[webform_submission:values:"~elementName~"]", webform_submission)|render_html_specialchars }}
+        {% set characterCounter = characterCounter + 2 + webform_token("[webform:element:"~ elementName ~":title:html]", webform)|length + webform_token("[webform_submission:values:"~elementName~"]", webform_submission)|length %} 
       {% endif %}
 
     {% else %}
-      {% set submissionString = submissionString ~ '\n' 
-      ~ element ~ ' is not a valid key or command is not spacebreak or print_line\n' 
-      ~ '\n' %}
+      {% set submissionString = submissionString ~ "\n" 
+      ~ element ~ " is not a valid key or command is not spacebreak or print_line\n" 
+      ~ "\n" %}
     {% endif %}
 
   
@@ -54,60 +52,61 @@
 
     {% set command = elementSplit[0] %}
     {% set elementName = elementSplit[1] %}
-    {% set elementKeyInvalid = 'webform_submission' in webform_token('[webform_submission:values:'~elementName~']', webform_submission) %}
+    {% set elementKeyInvalid = "webform_submission" in webform_token("[webform_submission:values:"~elementName~"]", webform_submission) %}
 
     {# multiple spacebreak command #}
-    {% if command == 'spacebreak' %}
+    {% if command == "spacebreak" %}
       {% for number in 1..(elementSplit[1] * 1) %}
-        {% set submissionString = submissionString ~ '\n' %}
+        {% set submissionString = submissionString ~ "\n" %}
       {% endfor %}
 
     {# print customized text command #}
-    {% elseif command == 'print_text' %}
-      {% set submissionString = submissionString ~ elementName ~ '\n' %}
+    {% elseif command == "print_text" %}
+      {% set submissionString = submissionString ~ elementName ~ "\n" %}
   
     {# print bolded line command (*****) #}
-    {% elseif command == 'print_line' %}
-      {% if elementName == 'bolded' %}
-        {% set submissionString = submissionString ~ '*****\n' %}
+    {% elseif command == "print_line" %}
+      {% if elementName == "bolded" %}
+        {% set submissionString = submissionString ~ "*****\n" %}
       {% endif %}
      
-    {% elseif command == 'print_section' or command != 'print_section_title' %}
+    {% elseif command == "print_section" or command != "print_section_title" %}
 
       {# Checks if key is valid #}
       {% if elementKeyInvalid == 1 %}
-        {% set submissionString = submissionString ~ '\n' 
-        ~ elementName ~ ' is not a valid key\n'
-        ~ '\n' %}
+        {% set submissionString = submissionString ~ "\n" 
+        ~ elementName ~ " is not a valid key\n"
+        ~ "\n" %}
 
       {# print a particular section as it is command #}
-      {% elseif command == 'print_section' %}
-        {% if (webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars) is not empty %}
-        {% set submissionString = submissionString ~ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars ~ '\n' %}
+      {% elseif command == "print_section" %}
+        {% if (webform_token("[webform_submission:values:"~elementName~"]", webform_submission)|render_html_specialchars) is not empty %}
+        {% set submissionString = submissionString ~ webform_token("[webform_submission:values:"~elementName~"]", webform_submission)|render_html_specialchars ~ "\n" %}
         {% endif %}
 
-      {# print only the section's title followed by lines (-----) #}
-      {% elseif command == 'print_section_title' %}
-        {% set submissionString = submissionString ~ webform_token('[webform:element:'~elementName~ ':title]', webform)|render_html_specialchars ~ '\n-----\n'  %}
+      {# print only the section"s title followed by lines (-----) #}
+      {% elseif command == "print_section_title" %}
+        {% set submissionString = submissionString ~ webform_token("[webform:element:"~elementName~ ":title]", webform)|render_html_specialchars ~ "\n-----\n"  %}
 
       {# Notifies if a command is not valid #}
       {% else %}
-        {% set submissionString = submissionString ~ '\n' 
-        ~ command ~ ' is not a valid command for the provided key\n'
-        ~ '\n' %}
+        {% set submissionString = submissionString ~ "\n" 
+        ~ command ~ " is not a valid command for the provided key\n"
+        ~ "\n" %}
       {% endif %}
 
     {% else %}
-      {% set submissionString = submissionString ~ '\n'
-      ~ command ~ ' is not a valid command (e.g. print_line | bolded, print_text "Insert text here", space_break | 2) \n'
-      ~ '\n' %}
+{#      {% set submissionString = submissionString ~ "\n"
+      ~ command ~ " is not a valid command (e.g. print_line | bolded, print_text "Insert text here", space_break | 2) \n"
+      ~ "\n" %}
+#}
     {% endif %}
 
 
   {% else %}
-    {% set submissionString = submissionString ~ '\n' 
-    ~ element ~ 'is not a valid format. '~ listOfCommands ~ '\n'
-    ~ '\n' %}
+    {% set submissionString = submissionString ~ "\n" 
+    ~ element ~ "is not a valid format. "~ listOfCommands ~ "\n"
+    ~ "\n" %}
 
   {% endif %}
 
@@ -116,6 +115,5 @@
 {% if submissionString|length > 4000 %}
   Note for AST: This submission surpasses the 4,000 character limit. Please see the "Additional Comments" at the bottom of the ticket to see the whole submission.
 {% endif %}
-The submission has {{ submissionString|length }} characters.
 
-{{ submissionString }}
+This is the character counter: {{ characterCounter }}
