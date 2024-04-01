@@ -1,34 +1,31 @@
-{# 
-Copy and paste this code in the 
-Important! 
-- Be sure to enable "Send email as HTML" in the advanced tab to create the proper formatting in UW Connect
-- Be sure to enable "Include files as attachment" in the Attachment section below
-- In "Included email values/markup section below, scroll towards the bottom and enable "Exclude element with file attachment"
+{% set submissionString = '' %}
 
-Instructions for elements_lists:
-- Add the key in the order you want it to appear in the submission
-- Any hidden elements and optional fields will automatically not be included, continue to add them in the order you want it to appear in the form as if it is going to be visible
+{% set submissionString = submissionString ~ 'Submitted on: ' ~ webform_token('[webform_submission:created]', webform_submission, [], options) ~ '\n' %}
+{% set submissionString = submissionString ~ 'Submitted by: ' ~ webform_token('[webform_submission:user]', webform_submission, [], options) ~ '\n' %}
+{% set submissionString = submissionString ~ 'Submitted from: ' ~ webform_token('[webform:title]', webform, [], options) ~ '\n\n' %}
 
-- Add 'spacebreak' to indicate 1 line break to give breathing room
-- Add 'spacebreak' followed by a number (e.g. 'break 4') to indicate number of line break
-
-- To use commands, type in the command followed by the element key. Available commands are:
-  - 'print_section' will print the section similar to the order of what's in the front-end form (e.g. 'print_section submitter_info') 
-  - 'print_section_title' will print only the section title appearing in the form with followed by some lines (----) (e.g. 'print_section_title get_started' will print Get Started)
--- Commands can be expanded by putting the code inside the block {% elseif elementSplitLength == 2 %} below
-#} 
-
-
-Submitted on {{ webform_token('[webform_submission:created]', webform_submission, [], options) }}
-Submitted by: {{ webform_token('[webform_submission:user]', webform_submission, [], options) }}
-Submitted from: {{ webform_token('[webform_submission:user]', webform_submission, [], options) }}
-
-Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
-'
 {% set elements_list = 
   [
-  'section submitter_information',
-  'department'
+  'spacebreak',
+  'print_line',
+  'spacebreak | 4',
+  'print_line | bolded',
+  'print_text | I really hope this works',
+  'print_section | submitter_information',
+  'spacebreak | 2',
+  'print_section_title | submission_section',
+  'optional_text',
+  'pizza_toppings',
+  'spiciness',
+  'cheesiness',
+  'drinks_option',
+  'spacebreak | 4',
+  'print_section | submission_section',
+  'spacebreak | 4',
+  'print_text | Invalid commands and keys here:',
+  'pizza_topping',
+  'print_section',
+  'print_section | submission_sect',
   ]
 %}
 
@@ -68,8 +65,9 @@ Submitted from: {{ webform_token('[webform:title]', webform, [], options) }}
     {% elseif (command != 'spacebreak') and ('webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission)) %}
       
       {% if command == 'print_section' %}
-        {% if (webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars) is not empty }
+        {% if webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars is not empty %}
         {{ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars }}
+        {% endif %}
 
       {% elseif command == 'print_section_title' %}
         {{ webform_token('[webform:element:'~elementName~ ':title]', webform)|render_html_specialchars }}
