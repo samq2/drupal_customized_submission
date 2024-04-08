@@ -1,9 +1,5 @@
 {% set submissionString = '' %}
 
-{% set submissionString = submissionString ~ 'Submitted on: ' ~ webform_token('[webform_submission:created]', webform_submission, [], options) ~ '\n' %}
-{% set submissionString = submissionString ~ 'Submitted by: ' ~ webform_token('[webform_submission:user]', webform_submission, [], options) ~ '\n' %}
-{% set submissionString = submissionString ~ 'Submitted from: ' ~ webform_token('[webform:title]', webform, [], options) ~ '\n\n' %}
-
 {% set elements_list = 
   [
   'text_area_1',
@@ -13,8 +9,10 @@
   'print_line | bolded'
   ]
 %}
+{% set submissionString = '' %}
 
 {% for element in elements_list %}
+
 
   {% set elementSplit = element|split(" | ") %}
   {% set elementSplitLength = elementSplit|length() %} 
@@ -26,7 +24,6 @@
     {% set elementName = elementSplit[0] %}
     {% set title = webform_token('[webform:element:'~ elementName ~':title:html]', webform)|render_html_specialchars %}
     {% set value = webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars %}
-    {% set titleValue = [title, value]|join(': ') %}
     
     {# spacebreak command #}
     {% if elementName == 'spacebreak' %}
@@ -39,7 +36,17 @@
     {# prints element that has the correct key, and if the value is not empty #}
     {% elseif 'webform_submission' not in webform_token('[webform_submission:values:'~elementName~']', webform_submission) %}
       {% if webform_token('[webform_submission:values:'~elementName~']', webform_submission) is not empty %}
-        {% set submissionString = submissionString ~ titleValue ~ '\n' %}
+        {% if  title['#markup'] is empty %}
+          {% set submissionString = submissionString ~ title ~ ': '%}
+        {% else %}
+          {% set submissionString = submissionString ~ title['#markup'] ~ ': '%}
+        {% endif %}
+        
+        {% if  value['#markup'] is empty %}
+          {% set submissionString = submissionString ~ value ~ '\n'%}
+        {% else %}
+          {% set submissionString = submissionString ~ value['#markup'] ~ '\n'%}
+        {% endif %}
       {% endif %}
 
     {% else %}
@@ -88,7 +95,7 @@
 
       {# print only the section's title followed by lines (-----) #}
       {% elseif command == 'print_section_title' %}
-        {% set submissionString = submissionString ~ webform_token('[webform:element:'~elementName~ ':title]', webform)|render_html_specialchars ~ '\n-----\n'  %}
+        {% set submissionString = submissionString ~ webform_token('[webform:element:'~elementName~ ':title]', webform)['#markup']|raw ~ '\n-----\n'  %}
 
       {# Notifies if a command is not valid #}
       {% else %}
@@ -118,4 +125,6 @@
 {% endif %}
 The submission has {{ submissionString|length }} characters.
 
-{{ submissionString }}
+{% autoescape false %}
+  {{ submissionString }}
+{% endautoescape %}  
