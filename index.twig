@@ -11,6 +11,7 @@
 %}
 {% set submissionString = '' %}
 
+
 {% for element in elements_list %}
 
 
@@ -89,8 +90,8 @@
 
       {# print a particular section as it is command #}
       {% elseif command == 'print_section' %}
-        {% if (webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars['#markup']) is not empty %}
-        {% set submissionString = submissionString ~ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars ~ '\n' %}
+        {% if (webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars) is not empty %}
+          {% set submissionString = submissionString ~ webform_token('[webform_submission:values:'~elementName~']', webform_submission)|render_html_specialchars['#markup'] ~ '\n' %}
         {% endif %}
 
       {# print only the section's title followed by lines (-----) #}
