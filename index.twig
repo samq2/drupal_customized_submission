@@ -27,7 +27,7 @@
     {% set value = webform_token("[webform_submission:values:"~elementName~"]", webform_submission)|render_html_specialchars %}
     
     {# spacebreak command #}
-    {% if elementName == "spacebreak" %}
+    {% if elementName == "linebreak" %}
       {% set submissionString = submissionString ~ "'\n" %}
     
     {# print_line command (-----) #}
@@ -65,7 +65,7 @@
     {% set elementKeyInvalid = "webform_submission" in webform_token("[webform_submission:values:"~elementName~"]", webform_submission) %}
 
     {# multiple spacebreak command #}
-    {% if command == "spacebreak" %}
+    {% if command == "linebreak" %}
       {% for number in 1..(elementSplit[1] * 1) %}
         {% set submissionString = submissionString ~ "'\n" %}
       {% endfor %}
