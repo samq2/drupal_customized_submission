@@ -7,8 +7,8 @@ Documentation for elements_list and what you can do (commands):
 Commands:
 *All commands follow the format of command | element_key*
 
-linebreak | *numberofspaces*: add specified number of linebreak
-print_text | *text here inside quotation marks*: print out customize text
-print_line | bolded: prints \*\*\*\*\* instead of -----
-print_section | *section element key*: Prints out the section of the form with the same order as it has on the user view of the form
-print_section_title | *section element key*: Only prints out the title of the section
+linebreak | *numberofspaces*: add specified number of linebreak\n
+print_text | *text here inside quotation marks*: print out customize text\n
+print_line | bolded: prints \*\*\*\*\* instead of -----\n
+print_section | *section element key*: Prints out the section of the form with the same order as it has on the user view of the form\n
+print_section_title | *section element key*: Only prints out the title of the section\n
