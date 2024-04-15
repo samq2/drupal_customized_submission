@@ -104,7 +104,13 @@
 
       {# print only the section"s title followed by lines (-----) #}
       {% elseif command == "print_section_title" %}
-        {% set submissionString = submissionString ~ webform_token("[webform:element:"~elementName~ ":title]", webform)["#markup"]|raw ~ "\n-----\n"  %}
+        {% if webform_token("[webform_submission:values:"~elementName~"]", webform_submission) is not empty %}
+          {% if  title["#markup"] is empty %}
+            {% set submissionString = submissionString ~ title ~ "\n-----\n" %}
+          {% else %}
+            {% set submissionString = submissionString ~ title["#markup"] ~ "\n-----\n" %}
+          {% endif %}
+        {% endif %}
 
       {# Notifies if a command is not valid #}
       {% else %}
