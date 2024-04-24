@@ -19,7 +19,7 @@
   {% set accountingAdjustment = ["Expense Report", "Procard", "Supplier Invoice"] %}
 
   {% for item in data["current_transaction_table"] %}
-    {% if webform_token('[webform_submission:values:current_transaction_table:0:transaction_type]', webform_submission) in accountingAdjustment %}
+    {% if webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter~":transaction_type]", webform_submission) in accountingAdjustment %}
       {% set accountingAdjustmentOutput = accountingAdjustmentOutput ~ 
       "Transaction " ~ accountingAdjustmentCounter ~
       "\n--\n" ~
@@ -30,9 +30,9 @@
       "\nCurrent Driver Worktag: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter~":current_driver_worktag]", webform_submission)|render_html_specialchars ~ "\n'\n" 
       %}
       {% set accountingAdjustmentCounter = accountingAdjustmentCounter + 1 %}
-    {% else %}
-      {% set journalEntry = journalEntryOutput ~ 
-      "Transaction" ~ journalEntryCounter ~
+    {% elseif webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter~":transaction_type]", webform_submission) in journalEntry %}
+      {% set journalEntryOutput = journalEntryOutput ~ 
+      "Transaction " ~ journalEntryCounter ~
       "\n--\n" ~
       "\nType: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter~":transaction_type]", webform_submission)|render_html_specialchars ~
       "\nID:  " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter~":transaction_id]", webform_submission)|render_html_specialchars ~
@@ -42,6 +42,7 @@
       %}
       {% set journalEntryCounter = journalEntryCounter + 1 %}
     {% endif %}
+    {% set compositeCounter = compositeCounter + 1 %} 
   {% endfor %}
   
   {# Checks to see how to output this section: Accounting Adjustment only, Journal Entry only, or both #}
