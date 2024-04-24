@@ -1,15 +1,3 @@
-{% set textAreaTitle = webform_token('[webform_submission:webform:element:current_transaction_table:title:transaction_type:title]', webform)|render_html_specialchars %}
-{% set textAreaValue = webform_token('[webform_submission:values:current_transaction_table:0:transaction_type]', webform_submission)|render_html_specialchars  %}
-{% set stringTest = '' %} 
-{% set element = 'current_transaction_table' %}
-
-{% set textAreaTitle = webform_token('[webform_submission:webform:element:current_transaction_table:title:transaction_type:title]', webform)|render_html_specialchars %}
-{% set textAreaValue = webform_token('[webform_submission:values:current_transaction_table:0:transaction_type]', webform_submission)|render_html_specialchars  %}
-{% set stringTest = '' %} 
-{% set element = 'current_transaction_table' %}
-
-
-
 {% set submissionDate = webform_token("[webform_submission:created]", webform_submission) %}
 {% set formTitle = webform_token("[webform:title]", webform) %}
 
@@ -19,35 +7,53 @@
 {# Accounting Adjustment Table Output #}
 {% set compositeOutput = "" %}
 
-{% if webform_token('[webform_submission:values:service_type]', webform_submission) == "Make Changesto 1 - 10 Transaction" %}
-
+{% if webform_token('[webform_submission:values:service_type]', webform_submission) == "Make Changes to 1 - 10 Transactions" %}
   {% set accountingAdjustmentOutput = "Accounting Adjustments\n-----\n" %}
   {% set journalEntryOutput = "Journal Entries\n-----\n" %}
+ 
   {% set compositeCounter = 0 %}
+  {% set accountingAdjustmentCounter = 1 %}
+  {% set journalEntryCounter = 1 %}
+  
   {% set journalEntry = ["CTA", "Miscellaneous Payment", "Customer Invoice", "Fringe Benefit", "ISD", "Operation Journal", "Tuition Transfer", "Pre-WD Payroll", "Pre-WD Non-Payroll"] %}
   {% set accountingAdjustment = ["Expense Report", "Procard", "Supplier Invoice"] %}
 
   {% for item in data["current_transaction_table"] %}
     {% if webform_token('[webform_submission:values:current_transaction_table:0:transaction_type]', webform_submission) in accountingAdjustment %}
       {% set accountingAdjustmentOutput = accountingAdjustmentOutput ~ 
-      "\nType: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":transaction_type]", webform_submission)|render_html_specialchars ~
-      "\nID:  " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":transaction_id]", webform_submission)|render_html_specialchars ~
-      "\nAmount: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":transaction_amount]", webform_submission)|render_html_specialchars ~
-      "\nAccounting Date: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":accounting_date]", webform_submission)|render_html_specialchars ~
-      "\nCurrent Driver Worktag: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":current_driver_worktag]", webform_submission)|render_html_specialchars ~ "\n'\n" 
+      "Transaction " ~ accountingAdjustmentCounter ~
+      "\n--\n" ~
+      "\nType: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter~":transaction_type]", webform_submission)|render_html_specialchars ~
+      "\nID: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter~":transaction_id]", webform_submission)|render_html_specialchars ~
+      "\nAmount: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter~":transaction_amount]", webform_submission)|render_html_specialchars ~
+      "\nAccounting Date: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter~":accounting_date]", webform_submission)|render_html_specialchars ~
+      "\nCurrent Driver Worktag: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter~":current_driver_worktag]", webform_submission)|render_html_specialchars ~ "\n'\n" 
       %}
+      {% set accountingAdjustmentCounter = accountingAdjustmentCounter + 1 %}
     {% else %}
       {% set journalEntry = journalEntryOutput ~ 
-      "\nType: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":transaction_type]", webform_submission)|render_html_specialchars ~
-      "\nID:  " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":transaction_id]", webform_submission)|render_html_specialchars ~
-      "\nAmount: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":transaction_amount]", webform_submission)|render_html_specialchars ~
-      "\nAccounting Date: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":accounting_date]", webform_submission)|render_html_specialchars ~
-      "\nCurrent Driver Worktag: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":current_driver_worktag]", webform_submission)|render_html_specialchars ~ "\n'\n" 
+      "Transaction" ~ journalEntryCounter ~
+      "\n--\n" ~
+      "\nType: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter~":transaction_type]", webform_submission)|render_html_specialchars ~
+      "\nID:  " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter~":transaction_id]", webform_submission)|render_html_specialchars ~
+      "\nAmount: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter~":transaction_amount]", webform_submission)|render_html_specialchars ~
+      "\nAccounting Date: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter~":accounting_date]", webform_submission)|render_html_specialchars ~
+      "\nCurrent Driver Worktag: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter~":current_driver_worktag]", webform_submission)|render_html_specialchars ~ "\n'\n" 
       %}
+      {% set journalEntryCounter = journalEntryCounter + 1 %}
     {% endif %}
   {% endfor %}
-  {% set compositeOutput = accountingAdjustmentOutput ~ "\n'\n-----\n'\n" ~ journalEntryOutput %}
+  
+  {# Checks to see how to output this section: Accounting Adjustment only, Journal Entry only, or both #}
+  {% if accountingAdjustmentCounter != 1 and journalEntryCounter == 1 %}
+    {% set compositeOutput = accountingAdjustmentOutput ~ "\n" %}
+  {% elseif accountingAdjustmentCounter == 1 and journalEntryCounter != 1 %}
+    {% set compositeOutput = journalEntryOutput ~ "\n" %}
+  {% else %}
+    {% set compositeOutput = accountingAdjustmentOutput ~ "\n'\n-----\n'\n" ~ journalEntryOutput %}
+  {% endif %}
 {% endif %}
+
 
 {% set elements_list = 
   [
@@ -128,7 +134,7 @@
       {% endif %}
 
     {% elseif command == "concatenate" %}
-      {% set submissionString = submissionString ~ attribute(_context, elementName) ~ "\n"}
+      {% set submissionString = submissionString ~ attribute(_context, elementName) ~ "\n" %}
     
     {% elseif command == "print_section" or command != "print_section_title" %}
 
