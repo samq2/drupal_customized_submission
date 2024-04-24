@@ -1,3 +1,13 @@
+{% set textAreaTitle = webform_token('[webform_submission:webform:element:current_transaction_table:title:transaction_type:title]', webform)|render_html_specialchars %}
+{% set textAreaValue = webform_token('[webform_submission:values:current_transaction_table:0:transaction_type]', webform_submission)|render_html_specialchars  %}
+{% set stringTest = '' %} 
+{% set element = 'current_transaction_table' %}
+
+{% set textAreaTitle = webform_token('[webform_submission:webform:element:current_transaction_table:title:transaction_type:title]', webform)|render_html_specialchars %}
+{% set textAreaValue = webform_token('[webform_submission:values:current_transaction_table:0:transaction_type]', webform_submission)|render_html_specialchars  %}
+{% set stringTest = '' %} 
+{% set element = 'current_transaction_table' %}
+
 
 
 {% set submissionDate = webform_token("[webform_submission:created]", webform_submission) %}
@@ -5,13 +15,47 @@
 
 {% set submissionString = "Form Title: " ~ formTitle ~ "\nSubmitted on: " ~ submissionDate ~ "\n'\n'\n" %}
 
+
+{# Accounting Adjustment Table Output #}
+{% set compositeOutput = "" %}
+
+{% if webform_token('[webform_submission:values:service_type]', webform_submission) == "Make Changesto 1 - 10 Transaction" %}
+
+  {% set accountingAdjustmentOutput = "Accounting Adjustments\n-----\n" %}
+  {% set journalEntryOutput = "Journal Entries\n-----\n" %}
+  {% set compositeCounter = 0 %}
+  {% set journalEntry = ["CTA", "Miscellaneous Payment", "Customer Invoice", "Fringe Benefit", "ISD", "Operation Journal", "Tuition Transfer", "Pre-WD Payroll", "Pre-WD Non-Payroll"] %}
+  {% set accountingAdjustment = ["Expense Report", "Procard", "Supplier Invoice"] %}
+
+  {% for item in data["current_transaction_table"] %}
+    {% if webform_token('[webform_submission:values:current_transaction_table:0:transaction_type]', webform_submission) in accountingAdjustment %}
+      {% set accountingAdjustmentOutput = accountingAdjustmentOutput ~ 
+      "\nType: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":transaction_type]", webform_submission)|render_html_specialchars ~
+      "\nID:  " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":transaction_id]", webform_submission)|render_html_specialchars ~
+      "\nAmount: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":transaction_amount]", webform_submission)|render_html_specialchars ~
+      "\nAccounting Date: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":accounting_date]", webform_submission)|render_html_specialchars ~
+      "\nCurrent Driver Worktag: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":current_driver_worktag]", webform_submission)|render_html_specialchars ~ "\n'\n" 
+      %}
+    {% else %}
+      {% set journalEntry = journalEntryOutput ~ 
+      "\nType: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":transaction_type]", webform_submission)|render_html_specialchars ~
+      "\nID:  " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":transaction_id]", webform_submission)|render_html_specialchars ~
+      "\nAmount: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":transaction_amount]", webform_submission)|render_html_specialchars ~
+      "\nAccounting Date: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":accounting_date]", webform_submission)|render_html_specialchars ~
+      "\nCurrent Driver Worktag: " ~ webform_token("[webform_submission:values:current_transaction_table:"~compositeCounter":current_driver_worktag]", webform_submission)|render_html_specialchars ~ "\n'\n" 
+      %}
+    {% endif %}
+  {% endfor %}
+  {% set compositeOutput = accountingAdjustmentOutput ~ "\n'\n-----\n'\n" ~ journalEntryOutput %}
+{% endif %}
+
 {% set elements_list = 
   [
-  "text_area_1",
-  "spacebreak",
-  "text_area_2",
-  "print_text | This should be printed",
-  "print_line | bolded"
+  "print_text | I am testing composite element output",
+  "linebreak",
+  "concatenate | compositeOutput",
+  "linebreak",
+  "print_text | End of test"
   ]
 %}
 
@@ -82,7 +126,10 @@
       {% if elementName == "bolded" %}
         {% set submissionString = submissionString ~ "*****\n" %}
       {% endif %}
-     
+
+    {% elseif command == "concatenate" %}
+      {% set submissionString = submissionString ~ attribute(_context, elementName) ~ "\n"}
+    
     {% elseif command == "print_section" or command != "print_section_title" %}
 
       {# Checks if key is valid #}
@@ -124,7 +171,6 @@
       ~ command ~ " is not a valid command (e.g. print_line | bolded, print_text 'Insert text here', space_break | 2) \n"
       ~ "'\n" %}
     {% endif %}
-
 
   {% else %}
     {% set submissionString = submissionString ~ "'\n" 
