@@ -58,11 +58,28 @@
 
 {% set elements_list = 
   [
-  "print_text | I am testing composite element output",
+  "print_line | bolded",
+  "watcher_add",
+  "watcher_email_address",
+  "print_line | bolded", 
+  "linebreak | 2",
+  "service_type",
+  "adjustment_grant_move",
+  "print_section_title | submitter_information",
+  "department",
+  "department_contact_name",
+  "department_contact_email",
   "linebreak",
+  "grant_supporting_details",
+  "linebreak",
+  "print_section_title | multiple_transaction_changes",
   "concatenate | compositeOutput",
-  "linebreak",
-  "print_text | End of test"
+  "print_section | transaction_change_section",
+  "split_a_transaction",
+  "spreadsheet_multiple_transaction_section",
+  "eib_bulk_upload_section",
+  "eib_training_section",
+  "other_accounting_inquiry_section"
   ]
 %}
 
@@ -77,7 +94,7 @@
 
 
     {% set elementName = elementSplit[0] %}
-    {% set title = webform_token("[webform:element:"~ elementName ~":title:html]", webform)|render_html_specialchars %}
+    {% set title = webform_token("[webform:element:"~ elementName ~":title]", webform)|render_html_specialchars %}
     {% set value = webform_token("[webform_submission:values:"~elementName~"]", webform_submission)|render_html_specialchars %}
     
     {# linebreakspacebreak command #}
@@ -133,11 +150,12 @@
       {% if elementName == "bolded" %}
         {% set submissionString = submissionString ~ "*****\n" %}
       {% endif %}
-
+    
+    {# concatenate a string, specifically helpful for customized code for composite elements. Customized code usually added in the beginning #}
     {% elseif command == "concatenate" %}
       {% set submissionString = submissionString ~ attribute(_context, elementName) ~ "\n" %}
     
-    {% elseif command == "print_section" or command != "print_section_title" %}
+    {% elseif command == "print_section" or command == "print_section_title" %}
 
       {# Checks if key is valid #}
       {% if elementKeyInvalid == 1 %}
@@ -158,6 +176,7 @@
 
       {# print only the section"s title followed by lines (-----) #}
       {% elseif command == "print_section_title" %}
+        print section title tests
         {% if webform_token("[webform_submission:values:"~elementName~"]", webform_submission) is not empty %}
           {% if  title["#markup"] is empty %}
             {% set submissionString = submissionString ~ title ~ "\n-----\n" %}
